@@ -1,0 +1,13 @@
+{
+  "variables": {
+    "automatic_version_bump": "1",
+    "automatic_version_verify": "1",
+    "builders": [
+      "amazon-ebs-amazon-linux"
+    ],
+    "project_description": "OpenLDAP Server",
+    "project_name": "nubis-openldap",
+    "project_version": "0.50",
+    "source_ami_project_name": "nubis-base"
+  }
+}
