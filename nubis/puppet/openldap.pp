@@ -1,1 +1,4 @@
-class { 'openldap::server': }
+package {
+    'openldap-servers':
+        ensure => latest;
+}
