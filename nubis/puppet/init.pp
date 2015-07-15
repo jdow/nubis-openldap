@@ -5,3 +5,4 @@
 # Typically you will include things like Apache and other puppet modules
 # which are included in the base image.
 #import 'skel.pp'
+import openldap.pp
