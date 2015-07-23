@@ -2,6 +2,10 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "OpenLDAP Server.",
   "Parameters": {
+    "BucketName": {
+      "Description": "Name of the S3 bucket",
+      "Type": "String"
+    },
     "ServiceName": {
       "Description": "Name of the service",
       "Type": "String"
@@ -28,6 +32,11 @@
     "AmiId": {
       "Description": "The id of the ami for this region",
       "Type": "String"
+    },
+    "StacksVersion": {
+      "Description": "Version of the Nubis Stacks",
+      "Type": "String",
+      "Default": "v0.9.0"
     }
   },
   "Mappings": {
@@ -102,6 +111,28 @@
             "Ref": "Environment"
           },
           "ElbHealthTarget": "HTTP:80/"
+        }
+      }
+    },
+    "S3Stack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubisproject-stacks", { "Ref": "StacksVersion" }, "s3-bucket.template" ] ] },
+        "TimeoutInMinutes": "60",
+        "Parameters": {
+          "ServiceName": {
+            "Ref": "ServiceName"
+          },
+          "Environment": {
+            "Ref": "Environment"
+          },
+          "BucketName": {
+            "Ref": "BucketName"
+          },
+          "TechnicalOwner": {
+            "Ref": "TechnicalOwner"
+          },
+          "AccessControl": "Private"
         }
       }
     }
