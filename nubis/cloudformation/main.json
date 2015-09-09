@@ -37,6 +37,24 @@
       "Description": "Version of the Nubis Stacks",
       "Type": "String",
       "Default": "v1.0.0"
+    },
+    "ReservedEniAZ1": {
+      "Description": "Reserved ENI IP for AZ1",
+       "AllowedPattern": "^([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5]))",
+       "ConstraintDescription": "Must be a valid IP",
+       "Default": ""
+    },
+    "ReservedEniAZ2": {
+      "Description": "Reserved ENI IP for AZ2",
+       "AllowedPattern": "^([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5]))",
+       "ConstraintDescription": "Must be a valid IP",
+       "Default": ""
+    },
+    "ReservedEniAZ3": {
+      "Description": "Reserved ENI IP for AZ3",
+       "AllowedPattern": "^([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5])).([0-9]|[1-9][0-9]|1[0-9]{2}|2([0-4][0-9]|5[0-5]))",
+       "ConstraintDescription": "Must be a valid IP",
+       "Default": ""
     }
   },
   "Mappings": {
@@ -50,6 +68,32 @@
       "sandbox": {
         "InstanceType": "t2.small"
       }
+    }
+  },
+  "Conditions": {
+    "NotSet_ReservedEniAZ1": {
+      "Fn::Equals": [
+        {
+          "Ref": "ReservedEniAZ1"
+        },
+        ""
+      ]
+    },
+    "NotSet_ReservedEniAZ2": {
+      "Fn::Equals": [
+        {
+          "Ref": "ReservedEniAZ2"
+        },
+        ""
+      ]
+    },
+    "NotSet_ReservedEniAZ3": {
+      "Fn::Equals": [
+        {
+          "Ref": "ReservedEniAZ3"
+        },
+        ""
+      ]
     }
   },
   "Resources": {
