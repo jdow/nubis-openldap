@@ -173,10 +173,6 @@
       "Type": "AWS::EC2::NetworkInterface",
       "Properties": {
         "Description": "ENI for AZ1",
-        "GroupSet": [
-          { "Fn::GetAtt": [ "EC2Stack", "Outputs.EC2SecurityGroup" ] },
-          { "Fn::GetAtt": [ "EC2Stack", "Outputs.GroupId" ] }
-        ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ1",
@@ -216,10 +212,6 @@
       "Type": "AWS::EC2::NetworkInterface",
       "Properties": {
         "Description": "ENI for AZ2",
-        "GroupSet": [
-          { "Fn::GetAtt": [ "EC2Stack", "Outputs.EC2SecurityGroup" ] },
-          { "Fn::GetAtt": [ "EC2Stack", "Outputs.GroupId" ] }
-        ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ2",
@@ -259,10 +251,6 @@
       "Type": "AWS::EC2::NetworkInterface",
       "Properties": {
         "Description": "ENI for AZ3",
-        "GroupSet": [
-          { "Fn::GetAtt": [ "EC2Stack", "Outputs.EC2SecurityGroup" ] },
-          { "Fn::GetAtt": [ "EC2Stack", "Outputs.GroupId" ] }
-        ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ3",
