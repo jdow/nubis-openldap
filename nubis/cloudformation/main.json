@@ -192,6 +192,10 @@
         },
         "Tags": [
           {
+            "Key": "Name",
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+          },
+          {
             "Key": "StackName",
             "Value": {
               "Ref": "AWS::StackName"
@@ -231,6 +235,10 @@
         },
         "Tags": [
           {
+            "Key": "Name",
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+          },
+          {
             "Key": "StackName",
             "Value": {
               "Ref": "AWS::StackName"
@@ -269,6 +277,10 @@
           ]
         },
         "Tags": [
+          {
+            "Key": "Name",
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+          },
           {
             "Key": "StackName",
             "Value": {
