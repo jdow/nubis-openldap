@@ -118,6 +118,9 @@
           "SSHKeyName": {
             "Ref": "SSHKeyName"
           },
+          "IamRole":{
+            "Ref": "IamEniRole"
+          },
           "InstanceType": {
             "Fn::FindInMap": [
               "InstanceTypeMap",
@@ -293,6 +296,56 @@
             "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ3" ] }
           }
         ]
+      }
+    },
+    "IamEniRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "IamEniAttachPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "attach", "policy" ] ] },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "CloudFormation:DescribeStackResource",
+                "ec2:AssociateAddress",
+                "ec2:AssignPrivateIpAddresses",
+                "ec2:AttachNetworkInterface",
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeInstances",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DetachNetworkInterface"
+              ],
+              "Resource": [ "*" ]
+            }
+          ]
+        },
+        "Roles": [ { "Ref": "IamEniRole" } ]
       }
     }
   },
