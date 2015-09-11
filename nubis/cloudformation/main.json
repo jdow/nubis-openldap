@@ -96,6 +96,7 @@
   "Resources": {
     "EC2Stack": {
       "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "EniAZ3",
       "Properties": {
         "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubis-stacks", { "Ref": "StacksVersion" }, "ec2.template" ] ] },
         "TimeoutInMinutes": "60",
@@ -129,7 +130,10 @@
               },
               "InstanceType"
             ]
-          }
+          },
+          "AutoScalingGroupMinSize": "2",
+          "AutoScalingGroupDesiredCapacity": "2",
+          "AutoScalingGroupMaxSize": "3"
         }
       }
     },
@@ -214,6 +218,7 @@
     },
     "EniAZ2": {
       "Type": "AWS::EC2::NetworkInterface",
+      "DependsOn": "EniAZ1",
       "Properties": {
         "Description": "ENI for AZ2",
         "PrivateIpAddress": {
@@ -257,6 +262,7 @@
     },
     "EniAZ3": {
       "Type": "AWS::EC2::NetworkInterface",
+      "DependsOn": "EniAZ2",
       "Properties": {
         "Description": "ENI for AZ3",
         "PrivateIpAddress": {
