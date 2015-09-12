@@ -1,0 +1,8 @@
+[template]
+src = "ldapcert.tmpl"
+dest = "/etc/openldap/certs/ldap-client.crt"
+prefix = "/%%STACK%%/%%ENVIRONMENT%%/config"
+
+keys = [
+    "/ldap-cert"
+]

@@ -1,0 +1,8 @@
+[template]
+src = "mozilla-ca.tmpl"
+dest = "/etc/openldap/cacerts/mozilla.crt"
+prefix = "/environments/%%ENVIRONMENT%%/global/ldap"
+
+keys = [
+    "/mozilla-ca"
+]
