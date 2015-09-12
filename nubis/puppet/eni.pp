@@ -10,6 +10,6 @@ file { '/usr/local/bin/nubis-startup/eni-associate':
 
 file { '/etc/nubis.d/10-eni-associate':
     ensure  => link,
-    target  => '/usr/local/bin/nubis-startup/eni-associate'
+    target  => '/usr/local/bin/nubis-startup/eni-associate',
     require => File['/usr/local/bin/nubis-startup/eni-associate']
 }
