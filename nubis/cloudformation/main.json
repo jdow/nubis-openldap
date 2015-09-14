@@ -173,6 +173,40 @@
         }
       }
     },
+    "ProjectInfo": {
+      "Type": "Custom::ProjectInfo",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:lambda:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":function:",
+              "LookupNestedStackOutputs"
+            ]
+          ]
+        },
+        "StackName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "vpc"
+            ]
+          ]
+        },
+        "SearchString": "Meta"
+      }
+    },
     "EniAZ1": {
       "Type": "AWS::EC2::NetworkInterface",
       "Properties": {
@@ -302,6 +336,42 @@
             "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ3" ] }
           }
         ]
+      }
+    },
+    "EniAz1Arecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "DependsOn": [ "EniAZ1", "EC2Stack" ],
+      "Properties": {
+        "Type": "A",
+        "Comment": "A record to point to LDAP ENI AZ1",
+        "TTL": "900",
+        "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ "ldapmasteraz1", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "ResourceRecords": { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] }
+      }
+    },
+    "EniAz2Arecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "DependsOn": [ "EniAZ2", "EC2Stack" ],
+      "Properties": {
+        "Type": "A",
+        "Comment": "A record to point to LDAP ENI AZ2",
+        "TTL": "900",
+        "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ "ldapmasteraz2", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "ResourceRecords": { "Fn::GetAtt": [ "EniAZ2", "PrimaryPrivateIpAddress" ] }
+      }
+    },
+    "EniAz3Arecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "DependsOn": [ "EniAZ3", "EC2Stack" ],
+      "Properties": {
+        "Type": "A",
+        "Comment": "A record to point to LDAP ENI AZ3",
+        "TTL": "900",
+        "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ "ldapmasteraz3", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "ResourceRecords": { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] }
       }
     },
     "IamEniRole": {
