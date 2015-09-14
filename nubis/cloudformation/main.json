@@ -347,7 +347,7 @@
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
         "Name": { "Fn::Join": [".", [ "ldapmasteraz1", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
-        "ResourceRecords": { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] }
+        "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] } ]
       }
     },
     "EniAz2Arecord": {
@@ -359,7 +359,7 @@
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
         "Name": { "Fn::Join": [".", [ "ldapmasteraz2", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
-        "ResourceRecords": { "Fn::GetAtt": [ "EniAZ2", "PrimaryPrivateIpAddress" ] }
+        "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ2", "PrimaryPrivateIpAddress" ] } ]
       }
     },
     "EniAz3Arecord": {
@@ -371,7 +371,7 @@
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
         "Name": { "Fn::Join": [".", [ "ldapmasteraz3", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
-        "ResourceRecords": { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] }
+        "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] } ]
       }
     },
     "IamEniRole": {
