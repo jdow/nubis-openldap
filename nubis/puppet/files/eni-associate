@@ -31,6 +31,7 @@ EC2_REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity
 # Stuff we need to attach ENI
 SUBNET_ID=$(aws ec2 describe-instances --region ${EC2_REGION} --instance-ids ${INSTANCE_ID} --query "Reservations[*].Instances[*][SubnetId]" --output text)
 ATTACHING_ENI=$(aws ec2 describe-network-interfaces  --region ${EC2_REGION} --filter Name=tag-key,Values=StackName Name=tag-value,Values=${NUBIS_STACK} --query "NetworkInterfaces[?Status == \`available\`][NetworkInterfaceId, SubnetId]" --output text | grep ${SUBNET_ID} | awk '{print $1}')
+ENI_TO_IP=$(aws ec2 describe-network-interfaces --region ${EC2_REGION}  --filter --filter Name=network-interface-id,Values=${ATTACHING_ENI} --query "NetworkInterfaces[*].PrivateIpAddress" --output text)
 
 if [[ "${ATTACHING_ENI}" ]]; then
     log "Attaching ENI ${ATTACHING_ENI} to instance ${INSTANCE_ID}"
