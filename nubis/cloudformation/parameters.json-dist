@@ -22,5 +22,17 @@
   {
     "ParameterKey": "BucketName",
     "ParameterValue": "NameOfYourBackupBucket"
+  },
+  {
+    "ParameterKey": "ReservedEniAZ1",
+    "ParameterValue": "x.x.x.x"
+  },
+  {
+    "ParameterKey": "ReservedEniAZ2",
+    "ParameterValue": "x.x.x.x"
+  },
+  {
+    "ParameterKey": "ReservedEniAZ3",
+    "ParameterValue": "x.x.x.x"
   }
 ]
