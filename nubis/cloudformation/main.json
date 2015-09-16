@@ -264,7 +264,7 @@
           },
           {
             "Key": "Description",
-            "Value": "ENI AZ1"
+            "Value": "eniaz1"
           },
           {
             "Key": "Subnet ID",
@@ -308,7 +308,7 @@
           },
           {
             "Key": "Description",
-            "Value": "ENI AZ2"
+            "Value": "eniaz2"
           },
           {
             "Key": "Subnet ID",
@@ -352,7 +352,7 @@
           },
           {
             "Key": "Description",
-            "Value": "ENI AZ3"
+            "Value": "eniaz3"
           },
           {
             "Key": "Subnet ID",
