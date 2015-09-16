@@ -1,0 +1,22 @@
+#!/bin/bash
+# Populate consul with the basic kv structure
+# We boldly assume we are using amazon linux
+#
+# Must run within an ec2 instance
+
+# Name of the stack, only required value here
+STACK_NAME="$1"
+
+if [[ -z "${STACK_NAME}" ]]; then
+    echo "Usage: $0 <stack name>"
+    exit 1
+fi
+
+eval $(curl -s -fq http://169.254.169.254/latest/user-data)
+
+# Amazon linux does funny stuff with its pathing when you sudo so I'm making sure the right path is there
+export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin:/home/ec2-user/bin
+
+consulate kv mkdir environments/${NUBIS_ENVIRONMENT}/global/ldap/
+
+consulate kv mkdir ${STACK_NAME}/${NUBIS_ENVIRONMENT}/config/
