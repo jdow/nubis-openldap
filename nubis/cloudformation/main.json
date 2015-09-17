@@ -156,7 +156,8 @@
             "Ref": "TechnicalOwner"
           },
           "AccessControl": "Private",
-          "WithRole": "true"
+          "WithRole": "true",
+          "Encrypt": "true"
         }
       }
     },
