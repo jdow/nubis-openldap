@@ -1,0 +1,12 @@
+# Very basic config
+
+REGION=${REGION:-us-east-1}
+ACCOUNT_NAME="plan-b-ldap-master"
+BASEZONE="nubis.allizom.org"
+
+base_dn=""
+root_dn=""
+rootpw=""
+replication_server=""
+replication_binduser=""
+replication_bindpassword=""

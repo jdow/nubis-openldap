@@ -1,8 +1,12 @@
 # Main entry for puppet
-#
 
-# Here we are simply importing a custom application puppet file.
-# Typically you will include things like Apache and other puppet modules
-# which are included in the base image.
-#import 'skel.pp'
+file { '/usr/local/bin/nubis-startup':
+    ensure => directory,
+    owner  => root,
+    group  => root,
+    mode   => '0744',
+}
+
 import 'openldap.pp'
+import 'eni.pp'
+import 'confd.pp'

@@ -51,13 +51,13 @@ In these examples the stack is called *nubis-skel*. You will need to choose a un
 ### Create
 To create a new stack:
 ```bash
-aws cloudformation create-stack --template-body file://nubis/cloudformation/main.json --parameters file://nubis/cloudformation/parameters.json --stack-name nubis-skel
+aws cloudformation create-stack --template-body file://nubis/cloudformation/main.json --parameters file://nubis/cloudformation/parameters.json --stack-name <stackname>
 ```
 
 ### Update
 To update and existing stack:
 ```bash
-aws cloudformation update-stack --template-body file://nubis/cloudformation/main.json --parameters file://nubis/cloudformation/parameters.json --stack-name nubis-skel 
+aws cloudformation update-stack --template-body file://nubis/cloudformation/main.json --parameters file://nubis/cloudformation/parameters.json --stack-name <stackname> 
 ```
 
 ### Login
@@ -69,7 +69,7 @@ ssh -A -t ec2-user@jumphost.sandbox.nubis.allizom.org "ssh -A -t ubuntu@$(nubis-
 ### Delete
 To delete the stack:
 ```bash
-aws cloudformation delete-stack --stack-name nubis-skel
+aws cloudformation delete-stack --stack-name <stackname>
 ```
 
 ## Nested Stacks

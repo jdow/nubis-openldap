@@ -2,13 +2,13 @@
   {
     "ParameterKey": "ServiceName",
     "ParameterValue": "skel"
-  }, 
+  },
   {
     "ParameterKey": "Environment",
     "ParameterValue": "sandbox"
-  }, 
+  },
   {
-    "ParameterKey": "KeyName",
+    "ParameterKey": "SSHKeyName",
     "ParameterValue": "key"
   },
   {
@@ -18,5 +18,21 @@
   {
     "ParameterKey": "AmiId",
     "ParameterValue": "ami-abcdef123"
+  },
+  {
+    "ParameterKey": "BucketName",
+    "ParameterValue": "NameOfYourBackupBucket"
+  },
+  {
+    "ParameterKey": "ReservedEniAZ1",
+    "ParameterValue": "x.x.x.x"
+  },
+  {
+    "ParameterKey": "ReservedEniAZ2",
+    "ParameterValue": "x.x.x.x"
+  },
+  {
+    "ParameterKey": "ReservedEniAZ3",
+    "ParameterValue": "x.x.x.x"
   }
 ]

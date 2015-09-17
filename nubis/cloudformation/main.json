@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "OpenLDAP Server.",
+  "Description": "OpenLDAP  master Server",
   "Parameters": {
     "BucketName": {
       "Description": "Name of the S3 bucket",
@@ -36,27 +36,69 @@
     "StacksVersion": {
       "Description": "Version of the Nubis Stacks",
       "Type": "String",
-      "Default": "v0.9.0"
+      "Default": "v1.0.0"
+    },
+    "ReservedEniAZ1": {
+      "Description": "Reserved ENI IP for AZ1",
+      "Type": "String",
+      "Default": ""
+    },
+    "ReservedEniAZ2": {
+      "Description": "Reserved ENI IP for AZ2",
+      "Type": "String",
+      "Default": ""
+    },
+    "ReservedEniAZ3": {
+      "Description": "Reserved ENI IP for AZ3",
+      "Type": "String",
+      "Default": ""
     }
   },
   "Mappings": {
     "InstanceTypeMap": {
       "prod": {
-        "InstanceType": "m3.large"
+        "InstanceType": "m3.medium"
       },
-      "dev": {
+      "stage": {
         "InstanceType": "m3.medium"
       },
       "sandbox": {
-        "InstanceType": "m3.medium"
+        "InstanceType": "t2.small"
       }
+    }
+  },
+  "Conditions": {
+    "NotSet_ReservedEniAZ1": {
+      "Fn::Equals": [
+        {
+          "Ref": "ReservedEniAZ1"
+        },
+        ""
+      ]
+    },
+    "NotSet_ReservedEniAZ2": {
+      "Fn::Equals": [
+        {
+          "Ref": "ReservedEniAZ2"
+        },
+        ""
+      ]
+    },
+    "NotSet_ReservedEniAZ3": {
+      "Fn::Equals": [
+        {
+          "Ref": "ReservedEniAZ3"
+        },
+        ""
+      ]
     }
   },
   "Resources": {
     "EC2Stack": {
       "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "EniAZ3",
       "Properties": {
-        "TemplateURL": "https://s3.amazonaws.com/nubisproject-stacks/master/ec2.template",
+        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubis-stacks", { "Ref": "StacksVersion" }, "ec2.template" ] ] },
         "TimeoutInMinutes": "60",
         "Parameters": {
           "StackName": {
@@ -77,6 +119,9 @@
           "SSHKeyName": {
             "Ref": "SSHKeyName"
           },
+          "IamRole":{
+            "Ref": "IamEniRole"
+          },
           "InstanceType": {
             "Fn::FindInMap": [
               "InstanceTypeMap",
@@ -86,38 +131,16 @@
               "InstanceType"
             ]
           },
-          "ELB": {
-            "Fn::GetAtt": [
-              "ELBStack",
-              "Outputs.ELB"
-            ]
-          }
-        }
-      }
-    },
-    "ELBStack": {
-      "Type": "AWS::CloudFormation::Stack",
-      "Properties": {
-        "TemplateURL": "https://s3.amazonaws.com/nubisproject-stacks/master/elb.template",
-        "TimeoutInMinutes": "60",
-        "Parameters": {
-          "ServiceName": {
-            "Ref": "ServiceName"
-          },
-          "TechnicalOwner": {
-            "Ref": "TechnicalOwner"
-          },
-          "Environment": {
-            "Ref": "Environment"
-          },
-          "ElbHealthTarget": "HTTP:80/"
+          "AutoScalingGroupMinSize": "2",
+          "AutoScalingGroupDesiredCapacity": "2",
+          "AutoScalingGroupMaxSize": "3"
         }
       }
     },
     "S3Stack": {
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
-        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubisproject-stacks", { "Ref": "StacksVersion" }, "s3-bucket.template" ] ] },
+        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubis-stacks", { "Ref": "StacksVersion" }, "s3-bucket.template" ] ] },
         "TimeoutInMinutes": "60",
         "Parameters": {
           "ServiceName": {
@@ -132,18 +155,343 @@
           "TechnicalOwner": {
             "Ref": "TechnicalOwner"
           },
-          "AccessControl": "Private"
+          "AccessControl": "Private",
+          "WithRole": "true",
+          "Encrypt": "true"
         }
+      }
+    },
+    "VpcInfo": {
+      "Type": "Custom::VpcInfo",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:lambda:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":function:",
+              "LookupNestedStackOutputs"
+            ]
+          ]
+        },
+        "StackName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "vpc"
+            ]
+          ]
+        },
+        "SearchString": {
+          "Ref": "Environment"
+        }
+      }
+    },
+    "ProjectInfo": {
+      "Type": "Custom::ProjectInfo",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:lambda:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":function:",
+              "LookupNestedStackOutputs"
+            ]
+          ]
+        },
+        "StackName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "AWS::Region"
+              },
+              "vpc"
+            ]
+          ]
+        },
+        "SearchString": "Meta"
+      }
+    },
+    "EniAZ1": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "Description": "ENI for AZ1",
+        "PrivateIpAddress": {
+          "Fn::If": [
+            "NotSet_ReservedEniAZ1",
+            {
+              "Ref": "AWS::NoValue"
+            },
+            {
+              "Ref": "ReservedEniAZ1"
+            }
+          ]
+        },
+        "SubnetId": {
+          "Fn::GetAtt": [
+            "VpcInfo",
+            "PrivateSubnetAZ1"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+          },
+          {
+            "Key": "StackName",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Description",
+            "Value": "eniaz1"
+          },
+          {
+            "Key": "Subnet ID",
+            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ1" ] }
+          }
+        ]
+      }
+    },
+    "EniAZ2": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "DependsOn": "EniAZ1",
+      "Properties": {
+        "Description": "ENI for AZ2",
+        "PrivateIpAddress": {
+          "Fn::If": [
+            "NotSet_ReservedEniAZ2",
+            {
+              "Ref": "AWS::NoValue"
+            },
+            {
+              "Ref": "ReservedEniAZ2"
+            }
+          ]
+        },
+        "SubnetId": {
+          "Fn::GetAtt": [
+            "VpcInfo",
+            "PrivateSubnetAZ2"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+          },
+          {
+            "Key": "StackName",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Description",
+            "Value": "eniaz2"
+          },
+          {
+            "Key": "Subnet ID",
+            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ2" ] }
+          }
+        ]
+      }
+    },
+    "EniAZ3": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "DependsOn": "EniAZ2",
+      "Properties": {
+        "Description": "ENI for AZ3",
+        "PrivateIpAddress": {
+          "Fn::If": [
+            "NotSet_ReservedEniAZ3",
+            {
+              "Ref": "AWS::NoValue"
+            },
+            {
+              "Ref": "ReservedEniAZ3"
+            }
+          ]
+        },
+        "SubnetId": {
+          "Fn::GetAtt": [
+            "VpcInfo",
+            "PrivateSubnetAZ3"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+          },
+          {
+            "Key": "StackName",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Description",
+            "Value": "eniaz3"
+          },
+          {
+            "Key": "Subnet ID",
+            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ3" ] }
+          }
+        ]
+      }
+    },
+    "EniAz1Arecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "DependsOn": [ "EniAZ1", "EC2Stack" ],
+      "Properties": {
+        "Type": "A",
+        "Comment": "A record to point to LDAP ENI AZ1",
+        "TTL": "900",
+        "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az1", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] } ]
+      }
+    },
+    "EniAz2Arecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "DependsOn": [ "EniAZ2", "EC2Stack" ],
+      "Properties": {
+        "Type": "A",
+        "Comment": "A record to point to LDAP ENI AZ2",
+        "TTL": "900",
+        "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az2", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ2", "PrimaryPrivateIpAddress" ] } ]
+      }
+    },
+    "EniAz3Arecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "DependsOn": [ "EniAZ3", "EC2Stack" ],
+      "Properties": {
+        "Type": "A",
+        "Comment": "A record to point to LDAP ENI AZ3",
+        "TTL": "900",
+        "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az3", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] } ]
+      }
+    },
+    "IamEniRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "IamEniAttachPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "attach", "policy" ] ] },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "CloudFormation:DescribeStackResource",
+                "ec2:AssociateAddress",
+                "ec2:AssignPrivateIpAddresses",
+                "ec2:AttachNetworkInterface",
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeInstances",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DetachNetworkInterface"
+              ],
+              "Resource": [ "*" ]
+            }
+          ]
+        },
+        "Roles": [ { "Ref": "IamEniRole" } ]
       }
     }
   },
   "Outputs": {
-    "ELBDNSName": {
-      "Description": "Consul: / ELB CNAME",
+    "EniAz1": {
+      "Description": "ENI ID AZ1",
+      "Value": {
+        "Ref": "EniAZ1"
+      }
+    },
+    "EniAz1Ip": {
+      "Description": "ENI IP AZ1",
       "Value": {
         "Fn::GetAtt": [
-          "ELBStack",
-          "Outputs.DNSName"
+          "EniAZ1",
+          "PrimaryPrivateIpAddress"
+        ]
+      }
+    },
+    "EniAz2": {
+      "Description": "ENI ID AZ2",
+      "Value": {
+        "Ref": "EniAZ2"
+      }
+    },
+    "EniAz2Ip": {
+      "Description": "ENI IP AZ3",
+      "Value": {
+        "Fn::GetAtt": [
+          "EniAZ2",
+          "PrimaryPrivateIpAddress"
+        ]
+      }
+    },
+    "EniAz3": {
+      "Description": "ENI ID AZ3",
+      "Value": {
+        "Ref": "EniAZ3"
+      }
+    },
+    "EniAz3Ip": {
+      "Description": "ENI IP AZ3",
+      "Value": {
+        "Fn::GetAtt": [
+          "EniAZ3",
+          "PrimaryPrivateIpAddress"
         ]
       }
     }

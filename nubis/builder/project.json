@@ -5,9 +5,9 @@
     "builders": [
       "amazon-ebs-amazon-linux"
     ],
-    "project_description": "OpenLDAP Server",
-    "project_name": "nubis-openldap",
-    "project_version": "0.54",
+    "project_description": "OpenLDAP Master Server",
+    "project_name": "nubis-openldap-master",
+    "project_version": "0.3",
     "source_ami_project_name": "nubis-base"
   }
 }
