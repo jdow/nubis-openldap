@@ -120,7 +120,7 @@
             "Ref": "SSHKeyName"
           },
           "IamRole":{
-            "Ref": "IamEniRole"
+            "Ref": "IamRole"
           },
           "InstanceType": {
             "Fn::FindInMap": [
@@ -156,7 +156,6 @@
             "Ref": "TechnicalOwner"
           },
           "AccessControl": "Private",
-          "WithRole": "true",
           "Encrypt": "true"
         }
       }
@@ -398,7 +397,7 @@
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] } ]
       }
     },
-    "IamEniRole": {
+    "IamRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -445,7 +444,35 @@
             }
           ]
         },
-        "Roles": [ { "Ref": "IamEniRole" } ]
+        "Roles": [ { "Ref": "IamRole" } ]
+      }
+    },
+    "S3IamS3Policy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "backup", "policy" ] ] },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": { "Fn::Join": [ "", [ "arn:aws:s3:::", { "Fn::GetAtt": [ "S3Stack", "Outputs.S3Bucket" ] } ] ] }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": { "Fn::Join": [ "", [ "arn:aws:s3:::", { "Fn::GetAtt": [ "S3Stack", "Outputs.S3Bucket" ] }, "/*" ] ] }
+            }
+          ]
+        },
+        "Roles": [ { "Ref": "IamRole" } ]
       }
     }
   },
