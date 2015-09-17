@@ -10,3 +10,4 @@ file { '/usr/local/bin/nubis-startup':
 import 'openldap.pp'
 import 'eni.pp'
 import 'confd.pp'
+import 'misc.pp'
