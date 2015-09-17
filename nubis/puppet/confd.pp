@@ -1,5 +1,5 @@
 
-file { '/etc/confd/conf.d/ldapcert.toml'
+file { '/etc/confd/conf.d/ldapcert.toml':
     ensure => file,
     owner  => root,
     group  => root,
