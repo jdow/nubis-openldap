@@ -6,15 +6,15 @@ eval $(curl -fq http://169.254.169.254/latest/user-data)
 
 # YUCK
 if [[ "${NUBIS_ENVIRONMENT}" != '' ]]; then
-    sed -i -e "s/%%ENVIRONMENT%%/$NUBIS_ENVIRONMENT/g" /etc/conf/conf.d/mozilla-ca.toml
+    sed -i -e "s/%%ENVIRONMENT%%/$NUBIS_ENVIRONMENT/g" /etc/confd/conf.d/mozilla-ca.toml
 fi
 
 if [[ "${NUBIS_ENVIRONMENT}" != '' ]]; then
-    sed -i -e "s/%%ENVIRONMENT%%/$NUBIS_ENVIRONMENT/g" /etc/conf/conf.d/ldapcert.toml
+    sed -i -e "s/%%ENVIRONMENT%%/$NUBIS_ENVIRONMENT/g" /etc/confd/conf.d/ldapcert.toml
 fi
 
 if [[ "${NUBIS_STACK}" != '' ]]; then
-    sed -i -e "s/%%STACK%%/$NUBIS_STACK/g" /etc/conf/conf.d/ldapcert.toml
+    sed -i -e "s/%%STACK%%/$NUBIS_STACK/g" /etc/confd/conf.d/ldapcert.toml
 fi
 
 # restart confd
