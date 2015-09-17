@@ -20,3 +20,8 @@ export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aw
 consulate kv mkdir environments/${NUBIS_ENVIRONMENT}/global/ldap/
 
 consulate kv mkdir ${STACK_NAME}/${NUBIS_ENVIRONMENT}/config/
+consulate kv set ${STACK_NAME}/${NUBIS_ENVIRONMENT}/config/base-dn ${base_dn}
+consulate kv set ${STACK_NAME}/${NUBIS_ENVIRONMENT}/config/root-dn ${root_dn}
+consulate kv set ${STACK_NAME}/${NUBIS_ENVIRONMENT}/config/rootpw ${rootpw}
+
+
