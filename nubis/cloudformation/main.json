@@ -234,6 +234,7 @@
       "Type": "AWS::EC2::NetworkInterface",
       "Properties": {
         "Description": "ENI for AZ1",
+        "GroupSet": [ { "Ref": "EniSecurityGroup" } ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ1",
@@ -265,10 +266,6 @@
           {
             "Key": "Description",
             "Value": "eniaz1"
-          },
-          {
-            "Key": "Subnet ID",
-            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ1" ] }
           }
         ]
       }
@@ -278,6 +275,7 @@
       "DependsOn": "EniAZ1",
       "Properties": {
         "Description": "ENI for AZ2",
+        "GroupSet": [ { "Ref": "EniSecurityGroup" } ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ2",
@@ -309,10 +307,6 @@
           {
             "Key": "Description",
             "Value": "eniaz2"
-          },
-          {
-            "Key": "Subnet ID",
-            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ2" ] }
           }
         ]
       }
@@ -322,6 +316,7 @@
       "DependsOn": "EniAZ2",
       "Properties": {
         "Description": "ENI for AZ3",
+        "GroupSet": [ { "Ref": "EniSecurityGroup" } ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ3",
@@ -353,10 +348,59 @@
           {
             "Key": "Description",
             "Value": "eniaz3"
+          }
+        ]
+      }
+    },
+    "EniSecurityGroup":{
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Inbound rules for ENI interfaces",
+        "VpcId": { "Fn::GetAtt": [ "VpcInfo", "VpcId" ] },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "389",
+            "ToPort": "389",
+            "CidrIp": "0.0.0.0/0"
           },
           {
-            "Key": "Subnet ID",
-            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ3" ] }
+            "IpProtocol": "636",
+            "FromPort": "636",
+            "ToPort": "636",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "389",
+            "ToPort": "389",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "636",
+            "FromPort": "636",
+            "ToPort": "636",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "ServiceName",
+            "Value": { "Ref": "ServiceName" }
+          },
+          {
+            "Key": "TechnicalOwner",
+            "Value": { "Ref": "TechnicalOwner" }
+          },
+          {
+            "Key": "Environment",
+            "Value": { "Ref": "Environment" }
+          },
+          {
+            "Key": "Purpose",
+            "Value": "Allow inbound and outbound LDAP and LDAPS from the ENI's"
           }
         ]
       }
