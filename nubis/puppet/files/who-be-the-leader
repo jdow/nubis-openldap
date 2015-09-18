@@ -25,5 +25,6 @@ REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity/doc
 MY_IP=$(curl -s  -fq http://169.254.169.254/latest/meta-data/local-ipv4)
 ENI_IP=$(aws ec2 describe-instances --instance-id ${INSTANCE_ID} --region ${REGION} --query "Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress" --output text | grep -v ${MY_IP})
 
+echo ${ENI_IP} > /var/tmp/eni_ip
 /usr/local/bin/consul-do ${NUBIS_STACK}/${NUBIS_ENVIRONMENT} ${ENI_IP} || exit
 log "Electing ${INSTANCE_ID} with ENI IP ${ENI_IP} as leader and creating a lock"
