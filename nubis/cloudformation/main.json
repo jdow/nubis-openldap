@@ -60,7 +60,7 @@
         "InstanceType": "m3.medium"
       },
       "stage": {
-        "InstanceType": "m3.medium"
+        "InstanceType": "t2.small"
       },
       "sandbox": {
         "InstanceType": "t2.small"
