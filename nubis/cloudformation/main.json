@@ -155,6 +155,7 @@
           "TechnicalOwner": {
             "Ref": "TechnicalOwner"
           },
+          "IamRole": { "Ref": "IamRole" },
           "AccessControl": "Private",
           "Encrypt": "true"
         }
@@ -490,34 +491,6 @@
         },
         "Roles": [ { "Ref": "IamRole" } ]
       }
-    },
-    "S3IamS3Policy": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": { "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, "backup", "policy" ] ] },
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "s3:ListBucket"
-              ],
-              "Resource": { "Fn::Join": [ "", [ "arn:aws:s3:::", { "Fn::GetAtt": [ "S3Stack", "Outputs.S3Bucket" ] } ] ] }
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject"
-              ],
-              "Resource": { "Fn::Join": [ "", [ "arn:aws:s3:::", { "Fn::GetAtt": [ "S3Stack", "Outputs.S3Bucket" ] }, "/*" ] ] }
-            }
-          ]
-        },
-        "Roles": [ { "Ref": "IamRole" } ]
-      }
     }
   },
   "Outputs": {
@@ -564,6 +537,12 @@
           "EniAZ3",
           "PrimaryPrivateIpAddress"
         ]
+      }
+    },
+    "S3Bucket": {
+      "Description": "Name of S3 Bucket",
+      "Value": {
+        "Fn::GetAtt": [ "S3Stack", "Outputs.S3Bucket" ]
       }
     }
   }
