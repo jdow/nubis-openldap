@@ -366,7 +366,7 @@
             "CidrIp": "0.0.0.0/0"
           },
           {
-            "IpProtocol": "636",
+            "IpProtocol": "tcp",
             "FromPort": "636",
             "ToPort": "636",
             "CidrIp": "0.0.0.0/0"
