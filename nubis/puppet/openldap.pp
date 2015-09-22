@@ -78,6 +78,6 @@ file { '/usr/local/bin/ldap/ldap-backup':
     owner   => root,
     group   => root,
     mode    => '0755',
-    source  => 'puppet:///nubis/files/ldap/ldap-backup.sh',
+    source  => 'puppet:///nubis/files/ldap/ldap-backup',
     require => File['/usr/local/bin/ldap']
 }
