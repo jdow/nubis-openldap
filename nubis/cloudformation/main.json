@@ -150,7 +150,7 @@
             "Ref": "Environment"
           },
           "BucketName": {
-            "Ref": "BucketName"
+            "Fn::Join": [ "-", [ { "Ref": "BucketName" }, { "Ref": "Environment" }, { "Ref": "AWS::Region" } ] ]
           },
           "TechnicalOwner": {
             "Ref": "TechnicalOwner"
@@ -482,7 +482,6 @@
                 "ec2:CreateNetworkInterface",
                 "ec2:DescribeInstances",
                 "ec2:DescribeNetworkInterfaces",
-                "ec2:DescribeSecurityGroups",
                 "ec2:DescribeSubnets",
                 "ec2:DetachNetworkInterface"
               ],
@@ -501,6 +500,18 @@
         "Ref": "EniAZ1"
       }
     },
+    "EniAz2": {
+      "Description": "ENI ID AZ2",
+      "Value": {
+        "Ref": "EniAZ2"
+      }
+    },
+    "EniAz3": {
+      "Description": "ENI ID AZ3",
+      "Value": {
+        "Ref": "EniAZ3"
+      }
+    },
     "EniAz1Ip": {
       "Description": "ENI IP AZ1",
       "Value": {
@@ -510,12 +521,6 @@
         ]
       }
     },
-    "EniAz2": {
-      "Description": "ENI ID AZ2",
-      "Value": {
-        "Ref": "EniAZ2"
-      }
-    },
     "EniAz2Ip": {
       "Description": "ENI IP AZ3",
       "Value": {
@@ -523,12 +528,6 @@
           "EniAZ2",
           "PrimaryPrivateIpAddress"
         ]
-      }
-    },
-    "EniAz3": {
-      "Description": "ENI ID AZ3",
-      "Value": {
-        "Ref": "EniAZ3"
       }
     },
     "EniAz3Ip": {
