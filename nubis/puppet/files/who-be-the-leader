@@ -5,6 +5,11 @@
 # Script also doubles up as a checker for consul service checks
 set -x
 
+eval $(curl -s -fq http://169.254.169.254/latest/user-data)
+INSTANCE_ID=$(curl -s -fq http://169.254.169.254/latest/meta-data/instance-id)
+REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r)
+MY_IP=$(curl -s  -fq http://169.254.169.254/latest/meta-data/local-ipv4)
+
 # Simple logging function
 function log() {
 
@@ -21,11 +26,6 @@ function log() {
         $LOGGER_BIN --stderr --priority local7.info --tag ${BASH_SOURCE} "$LOGMSG"
     fi
 }
-
-eval $(curl -s -fq http://169.254.169.254/latest/user-data)
-INSTANCE_ID=$(curl -s -fq http://169.254.169.254/latest/meta-data/instance-id)
-REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r)
-MY_IP=$(curl -s  -fq http://169.254.169.254/latest/meta-data/local-ipv4)
 
 # This is terrible we need to make sure all of our shit is actually available first
 function _is_my_eni_done {
