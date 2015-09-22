@@ -65,3 +65,19 @@ file { '/var/lib/ldap/DB_CONFIG':
     source  => 'puppet:///nubis/files/ldap/DB_CONFIG',
     require => Package['openldap-servers'],
 }
+
+file { '/usr/local/bin/ldap':
+    ensure => directory,
+    owner  => root,
+    group  => root,
+    mode   => '0744',
+}
+
+file { '/usr/local/bin/ldap/ldap-backup':
+    ensure  => file,
+    owner   => root,
+    group   => root,
+    mode    => '0755',
+    source  => 'puppet:///nubis/files/ldap/ldap-backup.sh',
+    require => File['/usr/local/bin/ldap']
+}

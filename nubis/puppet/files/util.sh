@@ -1,6 +1,7 @@
 # Variables
 eval $(curl -s -fq http://169.254.169.254/latest/user-data)
 REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r)
+INSTANCE_ID=$(curl -s -fq http://169.254.169.254/latest/meta-data/instance-id)
 
 # Simple logging function
 function log() {
