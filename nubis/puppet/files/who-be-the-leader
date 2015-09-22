@@ -27,10 +27,29 @@ INSTANCE_ID=$(curl -s -fq http://169.254.169.254/latest/meta-data/instance-id)
 REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r)
 MY_IP=$(curl -s  -fq http://169.254.169.254/latest/meta-data/local-ipv4)
 
+# This is terrible we need to make sure all of our shit is actually available first
+function _is_my_eni_done {
+
+    # Waiting for eni instance to come up
+    SUBNET_ID=$(aws ec2 describe-instances --region ${EC2_REGION} --instance-ids ${INSTANCE_ID} --query "Reservations[*].Instances[*][SubnetId]" --output text)
+    MY_ENI_NAME=$(aws ec2 describe-network-interfaces --region ${REGION} --filter Name=subnet-id,Values=${SUBNET_ID} Name=tag:aws:cloudformation:logical-id,Values=EniAZ* --query 'NetworkInterfaces[*].TagSet[?Key == `aws:cloudformation:logical-id`].Value | [0]' --output text)
+
+    COUNT=0
+    # There is now a timeout, try for 20 minutes (aka 20160 seconds more or less is 20 minutes)
+    until [[ ! -z "${AM_I_DONE}" ]] || [[ "${COUNT}" == "20160" ]]; do
+        AM_I_DONE=$(aws cloudformation describe-stack-resources --region ${REGION} --stack-name ${NUBIS_STACK} --query 'StackResources[*][LogicalResourceId, ResourceStatus]' --output text | grep ${MY_ENI_NAME} | egrep -q 'CREATE_COMPLETE')
+        sleep 10
+        COUNT=${COUNT}+1
+    done
+
+}
+
 # Whats my ENI IP?
 if [[ -f /var/tmp/eni_ip ]] && [[ -s /var/tmp/eni_ip ]]; then
     ENI_IP=$(cat /var/tmp/eni_ip)
 else
+    # Waiting for eni instance to come up
+    _is_my_eni_done
     ENI_IP=$(aws ec2 describe-instances --instance-id ${INSTANCE_ID} --region ${REGION} --query "Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress" --output text | grep -v ${MY_IP})
     echo ${ENI_IP} > /var/tmp/eni_ip
 fi
