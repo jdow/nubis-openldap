@@ -2,10 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "OpenLDAP  master Server",
   "Parameters": {
-    "BucketName": {
-      "Description": "Name of the S3 bucket",
-      "Type": "String"
-    },
     "ServiceName": {
       "Description": "Name of the service",
       "Type": "String"
@@ -150,7 +146,7 @@
             "Ref": "Environment"
           },
           "BucketName": {
-            "Fn::Join": [ "-", [ { "Ref": "BucketName" }, { "Ref": "Environment" }, { "Ref": "AWS::Region" } ] ]
+            "Fn::Join": [ "-", [ { "Ref": "ServiceName" }, { "Ref": "Environment" }, { "Ref": "AWS::Region" } ] ]
           },
           "TechnicalOwner": {
             "Ref": "TechnicalOwner"
