@@ -3,7 +3,7 @@
 # be the ldap sync server for the ldap slave
 #
 # Script also doubles up as a checker for consul service checks
-set -x
+#set -x
 
 eval $(curl -s -fq http://169.254.169.254/latest/user-data)
 INSTANCE_ID=$(curl -s -fq http://169.254.169.254/latest/meta-data/instance-id)
