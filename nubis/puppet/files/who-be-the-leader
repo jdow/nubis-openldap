@@ -31,7 +31,7 @@ function log() {
 function _is_my_eni_done {
 
     # Waiting for eni instance to come up
-    SUBNET_ID=$(aws ec2 describe-instances --region ${EC2_REGION} --instance-ids ${INSTANCE_ID} --query "Reservations[*].Instances[*][SubnetId]" --output text)
+    SUBNET_ID=$(aws ec2 describe-instances --region ${REGION} --instance-ids ${INSTANCE_ID} --query "Reservations[*].Instances[*][SubnetId]" --output text)
     MY_ENI_NAME=$(aws ec2 describe-network-interfaces --region ${REGION} --filter Name=subnet-id,Values=${SUBNET_ID} Name=tag:aws:cloudformation:logical-id,Values=EniAZ* --query 'NetworkInterfaces[*].TagSet[?Key == `aws:cloudformation:logical-id`].Value | [0]' --output text)
 
     COUNT=0
