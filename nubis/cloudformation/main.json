@@ -475,6 +475,7 @@
               "Effect": "Allow",
               "Action": [
                 "CloudFormation:DescribeStackResource",
+                "CloudFormation:DescribeStacks",
                 "ec2:AssociateAddress",
                 "ec2:AssignPrivateIpAddresses",
                 "ec2:AttachNetworkInterface",
