@@ -1,0 +1,51 @@
+#!/bin/bash
+# Back up ldif to S3
+
+# Simple logging function
+function log() {
+
+    local LOGGER_BIN='/usr/bin/logger'
+    local LOGMSG=$1
+
+    [ -z "$LOGMSG" ] && { echo "Usage: $FUNCNAME [log message]"; exit 1; }
+
+    # Set up the logger command if the binary is installed
+    if [ ! -x $LOGGER_BIN ]; then
+        # If logger is not installed just stderr it out
+        echo "$LOGMSG"
+    else
+        $LOGGER_BIN --stderr --priority local7.info --tag ${BASH_SOURCE} "$LOGMSG"
+    fi
+}
+
+eval $(curl -s -fq http://169.254.169.254/latest/user-data)
+REGION=$(curl -s -fq http://169.254.169.254/latest/dynamic/instance-identity/document | jq '.region' -r)
+
+# We just assume that this exists
+ENI_IP=$(cat /var/tmp/eni_ip)
+
+# Am I the leader?
+/usr/local/bin/consul-do ${NUBIS_STACK}/${NUBIS_ENVIRONMENT} ${ENI_IP} || exit
+
+umask 027
+
+# Please don't tell me to use mktemp,
+# if you want to use mktemp patches are welcomed
+date_format=$(date +\%Y-\%m-\%d_\%H:\%M:\%S)
+backup_file="backup-${date_format}.ldif"
+s3_bucket="${NUBIS_STACK}-${REGION}-backupbucket"
+
+# Slapcat the database
+/usr/sbin/slapcat | gzip -c > /tmp/${backup_file}.gz
+
+aws s3 cp --sse /tmp/${backup_file}.gz s3://${s3_bucket}
+RV=$?
+
+if [[ ${RV} != 0 ]]; then
+    log "ERROR: Unable to upload file (${backup_file}.gz) to S3 bucket (${s3_bucket})"
+else
+    log "SUCCESS: Uploaded backup file (${backup_file}.gz) to S3 bucket (${s3_bucket})"
+fi
+
+# cleanup
+rm -f /tmp/${backup_file}.gz
