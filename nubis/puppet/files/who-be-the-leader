@@ -48,8 +48,13 @@ function _is_my_eni_done {
 if [[ -f /var/tmp/eni_ip ]] && [[ -s /var/tmp/eni_ip ]]; then
     ENI_IP=$(cat /var/tmp/eni_ip)
 else
+    # Stuff we need to attach ENI
+    #SUBNET_ID=$(aws ec2 describe-instances --region ${EC2_REGION} --instance-ids ${INSTANCE_ID} --query "Reservations[*].Instances[*][SubnetId]" --output text)
+    #ATTACHING_ENI=$(aws ec2 describe-network-interfaces  --region ${EC2_REGION} --filter Name=tag-key,Values=StackName Name=tag-value,Values=${NUBIS_STACK} --query "NetworkInterfaces[?Status == \`available\`][NetworkInterfaceId, SubnetId]" --output text | grep ${SUBNET_ID} | awk '{print $1}')
+    #ENI_IP=$(aws ec2 describe-network-interfaces --region ${EC2_REGION}  --filter --filter Name=network-interface-id,Values=${ATTACHING_ENI} --query "NetworkInterfaces[*].PrivateIpAddress" --output text)
+
     # Waiting for eni instance to come up
-    _is_my_eni_done
+    #_is_my_eni_done
     ENI_IP=$(aws ec2 describe-instances --instance-id ${INSTANCE_ID} --region ${REGION} --query "Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress" --output text | grep -v ${MY_IP})
     echo ${ENI_IP} > /var/tmp/eni_ip
 fi
