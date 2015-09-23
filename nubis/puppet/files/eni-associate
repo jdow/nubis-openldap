@@ -36,6 +36,7 @@ ENI_TO_IP=$(aws ec2 describe-network-interfaces --region ${EC2_REGION}  --filter
 if [[ "${ATTACHING_ENI}" ]]; then
     log "Attaching ENI ${ATTACHING_ENI} to instance ${INSTANCE_ID}"
     aws ec2 attach-network-interface --region ${EC2_REGION} --network-interface-id ${ATTACHING_ENI} --instance-id ${INSTANCE_ID} --device-index 1
+    echo ${ATTACHING_ENI} > /var/tmp/eni_id
     RV=$?
     if [[ "${RV}" != 0 ]]; then
         log "ERROR: Unable to attach ENI ${ATTACHING_ENI} to instance ${INSTANCE_ID}"
