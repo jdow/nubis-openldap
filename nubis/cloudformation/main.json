@@ -293,7 +293,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " ( ", { "Ref": "Environment" }, " ) " ] ]  }
           },
           {
             "Key": "StackName",
@@ -334,7 +334,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " ( ", { "Ref": "Environment" }, " ) " ] ]  }
           },
           {
             "Key": "StackName",
