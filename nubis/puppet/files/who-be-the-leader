@@ -17,7 +17,7 @@ if [[ -f /var/tmp/eni_ip ]] && [[ -s /var/tmp/eni_ip ]]; then
 else
     if [[ -s /var/tmp/eni_id ]]; then
         ENI_ID=$(cat /var/tmp/eni_id)
-        ENI_IP=$(aws ec2 describe-network-interfaces ${ENI_ID} --region ${REGION} --query 'NetworkInterfaces[*].PrivateIpAddress' --output text)
+        ENI_IP=$(aws ec2 describe-network-interfaces --network-interface-ids ${ENI_ID} --region ${REGION} --query 'NetworkInterfaces[*].PrivateIpAddress' --output text)
     else
         # Attempt to grab it this way if we can't do it via the eni id
         ENI_IP=$(aws ec2 describe-instances --instance-id ${INSTANCE_ID} --region ${REGION} --query "Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress" --output text | grep -v ${MY_IP})

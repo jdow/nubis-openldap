@@ -410,6 +410,7 @@
         "Comment": "A record to point to LDAP ENI AZ1",
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az1" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az1", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] } ]
       }
@@ -422,7 +423,7 @@
         "Comment": "A record to point to LDAP ENI AZ2",
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
-        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az2", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az2" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ2", "PrimaryPrivateIpAddress" ] } ]
       }
     },
@@ -434,7 +435,7 @@
         "Comment": "A record to point to LDAP ENI AZ3",
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
-        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az3", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az3" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] } ]
       }
     },
