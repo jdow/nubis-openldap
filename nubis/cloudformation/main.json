@@ -411,7 +411,6 @@
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
         "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az1" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
-        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az1", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] } ]
       }
     },
