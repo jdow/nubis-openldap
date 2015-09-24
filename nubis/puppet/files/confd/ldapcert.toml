@@ -6,3 +6,5 @@ prefix = "/%%STACK%%/%%ENVIRONMENT%%/config"
 keys = [
     "/ldap-cert"
 ]
+
+reload_cmd = "/etc/openldap/restart-openldap.sh"
