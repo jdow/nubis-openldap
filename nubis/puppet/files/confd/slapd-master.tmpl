@@ -102,3 +102,42 @@ syncrepl rid=1
 updateref       {{ getv "/replication-server" }}
 
 mirrormode on
+
+########################################################################
+# Password policy definitions
+########################################################################
+moduleload ppolicy.la
+overlay ppolicy
+access to attrs=pwdGraceUseTime,pwdChangedTime,pwdPolicySubentry
+    by dn="{{ getv /passwordreset-binduser }}" manage
+    by * break
+access to attrs=pwdGraceAuthNLimit,pwdMaxAge
+    by dn="{{ getv /passwordreset-binduser }}" read
+    by * break
+
+include /etc/openldap/slapd.conf.acls
+
+########################################################################
+# Synclog overlay definitions for the main db
+########################################################################
+moduleload syncprov.la
+overlay syncprov
+# Checkpoint the syncrepl stream every 100 updates or every 10 minutes
+syncprov-checkpoint 100 10
+
+########################################################################
+# Auditlog overlay definitions for the main db
+########################################################################
+moduleload auditlog.la
+overlay auditlog
+auditlog /var/lib/ldap/auditlogs/auditlog.ldif
+
+# Monitoring database
+moduleload      back_monitor.la
+database monitor
+
+access to dn.subtree="cn=Monitor"
+    by dn="{{ getv /ldapmonitor-dn }}" read
+    by group="{{ getv /ldapadmin-dn }}" read
+    by users read
+    by * none
