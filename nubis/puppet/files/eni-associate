@@ -29,4 +29,4 @@ echo ${ATTACHING_ENI} > /var/tmp/eni_id
 echo ${ENI_TO_IP} > /var/tmp/eni_ip
 
 # Create a facter fact as well why not
-echo "eni_id=${ATTACHING_ENI}" > /etc/facter/facter.d/eni_id
+echo "eni_id=${ATTACHING_ENI}" > /etc/facter/facts.d/eni_id
