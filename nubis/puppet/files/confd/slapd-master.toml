@@ -1,0 +1,18 @@
+[template]
+srv = "slapd-master.tmpl"
+dest = "/etc/openldap/slapd.conf"
+prefix = "/%%STACK%%/%%ENVIRONMENT%%/config"
+
+keys = [
+    "/base-dn",
+    "/root-dn",
+    "/rootpw",
+    "/replication-server",
+    "/replication-binduser",
+    "/replication-bindpassword",
+    "/passwordreset-binduser",
+    "/ldapmonitor-dn",
+    "/ldapadmin-dn"
+]
+
+reload_cmd = "/etc/openldap/restart-openldap.sh"
