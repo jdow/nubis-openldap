@@ -1,0 +1,37 @@
+#!/bin/bash
+# Back up ldif to S3
+
+. /usr/local/lib/util.sh
+
+# We just assume that this exists
+ENI_IP=$(cat /var/tmp/eni_ip)
+
+# Am I the leader?
+/usr/local/bin/consul-do ${NUBIS_STACK}/${NUBIS_ENVIRONMENT} ${ENI_IP} || exit
+
+umask 027
+
+# Please don't tell me to use mktemp,
+# if you want to use mktemp patches are welcomed
+date_format=$(date +\%Y-\%m-\%d_\%H:\%M:\%S)
+backup_file="backup-${date_format}.ldif.gz"
+s3_bucket="${NUBIS_STACK}-${REGION}-backupbucket"
+
+# Slapcat the database
+log "Backing up LDAP database"
+/usr/sbin/slapcat | gzip -c > /tmp/${backup_file}
+
+if [[ -s /tmp/${backup_file} ]]; then
+    for DEST in ${backup_file} latest.ldif.gz; do
+        log "Attempting to backup ${DEST} to S3 (${s3_bucket})"
+        aws s3 cp --sse /tmp/${backup_file} s3://${s3_bucket}/${DEST} --quiet
+        RV=$?
+
+        if [[ ${RV} -ne 0 ]]; then
+            log "ERROR: RV value is ${RV} and unable to backup ${DEST} to S3"
+        fi
+    done
+fi
+
+# cleanup
+rm -f /tmp/${backup_file}.gz

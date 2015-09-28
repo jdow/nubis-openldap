@@ -1,0 +1,42 @@
+#!/bin/bash
+# restores an ldap database only use this during startup
+
+. /usr/local/lib/util.sh
+
+restore_state_file="/var/tmp/ldap-restore-state"
+state=$(cat ${restore_state_file})
+s3_bucket="${NUBIS_STACK}-${REGION}-backupbucket"
+ldap_base="dc=mozilla"
+
+if [[ -f "${restore_state_file}" ]] || [[ "${state}" != 0 ]]; then
+    log "Not restoring LDAP database ${restore_state_file} exists"
+    exit 1
+fi
+
+log "Grabbing latest ldif from S3 (${s3_bucket})"
+aws s3 cp s3://${s3_bucket}/latest.ldif.gz /tmp/latest.ldif.gz
+gunzip -c /tmp/latest.ldif.gz > /tmp/latest.ldif
+
+if [[ -s /tmp/latest.ldif ]]; then
+    log "Attempting to restore LDAP database from backups"
+    service slapd stop
+    /usr/sbin/slapadd -b "${ldap_base}" -l /tmp/latest.ldif
+    RV=$?
+    if [[ "${RV}" != 0 ]]; then
+        log "Error: Unable to restore ldif"
+        echo 1 > ${restore_state_file}
+    else
+        log "Success: Restored latest ldif from backups"
+        echo 0 > ${restore_state_file}
+    fi
+
+    /bin/chown -R ldap:ldap /var/lib/ldap
+    service slapd start
+else
+    log "Error: Latest backup has issues, not going to try to restore at all"
+    exit 1
+fi
+
+# cleanup
+rm -f /tmp/latest.ldif.gz
+rm -f /tmp/latest.ldif

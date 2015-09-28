@@ -20,10 +20,6 @@
     "ParameterValue": "ami-abcdef123"
   },
   {
-    "ParameterKey": "BucketName",
-    "ParameterValue": "NameOfYourBackupBucket"
-  },
-  {
     "ParameterKey": "ReservedEniAZ1",
     "ParameterValue": "x.x.x.x"
   },

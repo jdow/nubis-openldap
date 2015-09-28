@@ -1,0 +1,36 @@
+#!/bin/bash
+# During startup we need to elect a "leader" so that that host
+# be the ldap sync server for the ldap slave
+#
+# Script also doubles up as a checker for consul service checks
+#set -x
+
+. /usr/local/lib/util.sh
+
+MY_IP=$(curl -s  -fq http://169.254.169.254/latest/meta-data/local-ipv4)
+
+# Whats my ENI IP? We don't want to run describe instance everytime
+# so we dump the eni ip to the filesystem and hope and pray it doesn't get overwritten
+# if file does not exist and the size of the file is > 0 then we run the aws cli command
+if [[ -f /var/tmp/eni_ip ]] && [[ -s /var/tmp/eni_ip ]]; then
+    ENI_IP=$(cat /var/tmp/eni_ip)
+else
+    if [[ -s /var/tmp/eni_id ]]; then
+        ENI_ID=$(cat /var/tmp/eni_id)
+        ENI_IP=$(aws ec2 describe-network-interfaces --network-interface-ids ${ENI_ID} --region ${REGION} --query 'NetworkInterfaces[*].PrivateIpAddress' --output text)
+    else
+        # Attempt to grab it this way if we can't do it via the eni id
+        ENI_IP=$(aws ec2 describe-instances --instance-id ${INSTANCE_ID} --region ${REGION} --query "Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress" --output text | grep -v ${MY_IP})
+    fi
+    echo ${ENI_IP} > /var/tmp/eni_ip
+fi
+
+if [[ "$1" == "check" ]]; then
+    # we don't really care about if this check passes or not really,
+    # we're really only doing this so that we can make the check pass and
+    # so that we can have consul actually re-run consul-do to get a new lock. Yes its a cheat i know
+    /usr/local/bin/consul-do ${NUBIS_STACK}/${NUBIS_ENVIRONMENT} ${ENI_IP} DEBUG || exit 0
+else
+    /usr/local/bin/consul-do ${NUBIS_STACK}/${NUBIS_ENVIRONMENT} ${ENI_IP} || exit
+    log "Electing ${INSTANCE_ID} with ENI IP ${ENI_IP} as leader and creating a lock"
+fi

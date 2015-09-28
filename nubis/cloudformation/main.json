@@ -2,10 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "OpenLDAP  master Server",
   "Parameters": {
-    "BucketName": {
-      "Description": "Name of the S3 bucket",
-      "Type": "String"
-    },
     "ServiceName": {
       "Description": "Name of the service",
       "Type": "String"
@@ -60,7 +56,7 @@
         "InstanceType": "m3.medium"
       },
       "stage": {
-        "InstanceType": "m3.medium"
+        "InstanceType": "t2.small"
       },
       "sandbox": {
         "InstanceType": "t2.small"
@@ -120,7 +116,7 @@
             "Ref": "SSHKeyName"
           },
           "IamRole":{
-            "Ref": "IamEniRole"
+            "Ref": "IamRole"
           },
           "InstanceType": {
             "Fn::FindInMap": [
@@ -150,13 +146,13 @@
             "Ref": "Environment"
           },
           "BucketName": {
-            "Ref": "BucketName"
+            "Fn::Join": [ "-", [ { "Ref": "AWS::StackName" }, { "Ref": "AWS::Region" }, "backupbucket" ] ]
           },
           "TechnicalOwner": {
             "Ref": "TechnicalOwner"
           },
+          "IamRole": { "Ref": "IamRole" },
           "AccessControl": "Private",
-          "WithRole": "true",
           "Encrypt": "true"
         }
       }
@@ -235,6 +231,7 @@
       "Type": "AWS::EC2::NetworkInterface",
       "Properties": {
         "Description": "ENI for AZ1",
+        "GroupSet": [ { "Ref": "EniSecurityGroup" } ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ1",
@@ -266,10 +263,6 @@
           {
             "Key": "Description",
             "Value": "eniaz1"
-          },
-          {
-            "Key": "Subnet ID",
-            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ1" ] }
           }
         ]
       }
@@ -279,6 +272,7 @@
       "DependsOn": "EniAZ1",
       "Properties": {
         "Description": "ENI for AZ2",
+        "GroupSet": [ { "Ref": "EniSecurityGroup" } ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ2",
@@ -299,7 +293,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " ( ", { "Ref": "Environment" }, " ) " ] ]  }
           },
           {
             "Key": "StackName",
@@ -310,10 +304,6 @@
           {
             "Key": "Description",
             "Value": "eniaz2"
-          },
-          {
-            "Key": "Subnet ID",
-            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ2" ] }
           }
         ]
       }
@@ -323,6 +313,7 @@
       "DependsOn": "EniAZ2",
       "Properties": {
         "Description": "ENI for AZ3",
+        "GroupSet": [ { "Ref": "EniSecurityGroup" } ],
         "PrivateIpAddress": {
           "Fn::If": [
             "NotSet_ReservedEniAZ3",
@@ -343,7 +334,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " (", { "Ref": "Environment" }, ")" ] ]  }
+            "Value": { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, " ( ", { "Ref": "Environment" }, " ) " ] ]  }
           },
           {
             "Key": "StackName",
@@ -354,10 +345,59 @@
           {
             "Key": "Description",
             "Value": "eniaz3"
+          }
+        ]
+      }
+    },
+    "EniSecurityGroup":{
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Inbound rules for ENI interfaces",
+        "VpcId": { "Fn::GetAtt": [ "VpcInfo", "VpcId" ] },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "389",
+            "ToPort": "389",
+            "CidrIp": "0.0.0.0/0"
           },
           {
-            "Key": "Subnet ID",
-            "Value": { "Fn::GetAtt": [ "VpcInfo", "PrivateSubnetAZ3" ] }
+            "IpProtocol": "tcp",
+            "FromPort": "636",
+            "ToPort": "636",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "389",
+            "ToPort": "389",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "636",
+            "ToPort": "636",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "ServiceName",
+            "Value": { "Ref": "ServiceName" }
+          },
+          {
+            "Key": "TechnicalOwner",
+            "Value": { "Ref": "TechnicalOwner" }
+          },
+          {
+            "Key": "Environment",
+            "Value": { "Ref": "Environment" }
+          },
+          {
+            "Key": "Purpose",
+            "Value": "Allow inbound and outbound LDAP and LDAPS from the ENI's"
           }
         ]
       }
@@ -370,7 +410,7 @@
         "Comment": "A record to point to LDAP ENI AZ1",
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
-        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az1", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az1" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ1", "PrimaryPrivateIpAddress" ] } ]
       }
     },
@@ -382,7 +422,7 @@
         "Comment": "A record to point to LDAP ENI AZ2",
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
-        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az2", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az2" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ2", "PrimaryPrivateIpAddress" ] } ]
       }
     },
@@ -394,11 +434,11 @@
         "Comment": "A record to point to LDAP ENI AZ3",
         "TTL": "900",
         "HostedZoneId": { "Fn::Join": [ ".", [ { "Fn::GetAtt": [ "ProjectInfo", "HostedZoneId" ] } ] ] },
-        "Name": { "Fn::Join": [".", [ { "Ref": "ServiceName" }, "az3", { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
+        "Name": { "Fn::Join": [".", [ { "Fn::Join": [ "", [ { "Ref": "ServiceName" }, "az3" ] ] }, { "Ref": "Environment" }, { "Fn::GetAtt": ["ProjectInfo", "HostedZoneName"] } ] ] },
         "ResourceRecords": [ { "Fn::GetAtt": [ "EniAZ3", "PrimaryPrivateIpAddress" ] } ]
       }
     },
-    "IamEniRole": {
+    "IamRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -431,13 +471,13 @@
               "Effect": "Allow",
               "Action": [
                 "CloudFormation:DescribeStackResource",
+                "CloudFormation:DescribeStackResources",
                 "ec2:AssociateAddress",
                 "ec2:AssignPrivateIpAddresses",
                 "ec2:AttachNetworkInterface",
                 "ec2:CreateNetworkInterface",
                 "ec2:DescribeInstances",
                 "ec2:DescribeNetworkInterfaces",
-                "ec2:DescribeSecurityGroups",
                 "ec2:DescribeSubnets",
                 "ec2:DetachNetworkInterface"
               ],
@@ -445,7 +485,7 @@
             }
           ]
         },
-        "Roles": [ { "Ref": "IamEniRole" } ]
+        "Roles": [ { "Ref": "IamRole" } ]
       }
     }
   },
@@ -454,6 +494,18 @@
       "Description": "ENI ID AZ1",
       "Value": {
         "Ref": "EniAZ1"
+      }
+    },
+    "EniAz2": {
+      "Description": "ENI ID AZ2",
+      "Value": {
+        "Ref": "EniAZ2"
+      }
+    },
+    "EniAz3": {
+      "Description": "ENI ID AZ3",
+      "Value": {
+        "Ref": "EniAZ3"
       }
     },
     "EniAz1Ip": {
@@ -465,12 +517,6 @@
         ]
       }
     },
-    "EniAz2": {
-      "Description": "ENI ID AZ2",
-      "Value": {
-        "Ref": "EniAZ2"
-      }
-    },
     "EniAz2Ip": {
       "Description": "ENI IP AZ3",
       "Value": {
@@ -480,12 +526,6 @@
         ]
       }
     },
-    "EniAz3": {
-      "Description": "ENI ID AZ3",
-      "Value": {
-        "Ref": "EniAZ3"
-      }
-    },
     "EniAz3Ip": {
       "Description": "ENI IP AZ3",
       "Value": {
@@ -493,6 +533,12 @@
           "EniAZ3",
           "PrimaryPrivateIpAddress"
         ]
+      }
+    },
+    "S3Bucket": {
+      "Description": "Name of S3 Bucket",
+      "Value": {
+        "Fn::GetAtt": [ "S3Stack", "Outputs.S3Bucket" ]
       }
     }
   }

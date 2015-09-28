@@ -1,0 +1,13 @@
+{
+  "service": {
+    "name": "ldapmaster-leader",
+    "tags": [
+      "ldapmaster",
+      "ldapmaster-check-leader"
+    ],
+    "check": {
+      "script": "/usr/local/bin/check_ldapmaster_leader check",
+      "interval": "30s"
+    }
+  }
+}
